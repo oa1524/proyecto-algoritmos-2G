@@ -1,7 +1,8 @@
 import read_json
 
 def main():
-    read_json.read()
+    lista_municipios = read_json.read()
+    print(lista_municipios)
 
 if __name__ == '__main__':
     main()
