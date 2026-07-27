@@ -10,8 +10,10 @@ def ver_coord(list_municipios):
             else:
                 cant_local_nocoord+=1
         porcentaje_local_coord = (cant_local_coord / cant_local)*100
-        print("Municipio: ", municipio.nombre)
-        print("Cantidad de localidades cargadas:", cant_local)
-        print("Cantidad de localidades con coordenadas geograficas:", cant_local_coord)
-        print("Cantidad de localidades sin coordenadas geograficas:", cant_local_nocoord)
-        print("Porcentaje de localidades con coordenadas:", porcentaje_local_coord,"%")
+        print(f"""{"-"*30}
+Municipio: {municipio.nombre}
+    Cantidad de localidades cargadas: {cant_local}
+    Cantidad de localidades con coordenadas geograficas: {cant_local_coord}
+    Cantidad de localidades sin coordenadas geograficas: {cant_local_nocoord}
+    Porcentaje de localidades con coordenadas: {round(porcentaje_local_coord, 2)}%
+""")
