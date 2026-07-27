@@ -14,4 +14,4 @@ def ver_coord(list_municipios):
         print("Cantidad de localidades cargadas:", cant_local)
         print("Cantidad de localidades con coordenadas geograficas:", cant_local_coord)
         print("Cantidad de localidades sin coordenadas geograficas:", cant_local_nocoord)
-        print("Porcentaje dd localidades  on coordenadas:", porcentaje_local_coord,"%")
+        print("Porcentaje de localidades con coordenadas:", porcentaje_local_coord,"%")
