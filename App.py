@@ -54,7 +54,7 @@ class App():
             opcion = int(input("Seleccione una opcion: "))
             if opcion == 0:
                 break
-            if opcion == 1:
+            elif opcion == 1:
                 while True:
                     print(f"""{"-"*30}
 Consulta del clima en tiempo real:
@@ -81,3 +81,6 @@ Consulta del clima en tiempo real:
                             else: 
                                 municipio_selecc = self.lista_municipios[opcion1_1_n -1]
                                 print("Municipio seleccionado: ", municipio_selecc.nombre)
+            else:
+                print("Opcion invalida")
+                continue
