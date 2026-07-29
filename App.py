@@ -95,11 +95,11 @@ Consulta del clima en tiempo real:
                                 print(F"""{"-"*30}
 0. Volver al menu anterior
 Municipio seleccionado: {municipio_selecc.nombre}""")
-                                num_opcion2 = 1
+                                num_opcion2 = 0
                                 for localidad in municipio_selecc.local:
                                     if localidad.lat and localidad.long != None:
-                                        print(f"{num_opcion2}. {localidad.local}")
                                         num_opcion2 += 1
+                                        print(f"{num_opcion2}. {localidad.local}")
                                 opcion1_1_local = int(input("Seleccione una opcion: "))
                                 if opcion1_1_local == 0:
                                     break
@@ -110,19 +110,27 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                                     localidad_selecc = municipio_selecc.local[opcion1_1_local -1]
                                     # CONTINUAR
             elif opcion1_1 == 2:
-               while True:
-                    print(f"""{"-"*30}
-0. Volver al menu anterior
-1. Ingrese el nombre de una localidad.""") 
-                    opcion1_2 = int(input("Sdleccione una opcion: "))
-                    if opcion1_2 == 0:
+                while True:
+                    encontrado = False
+                    print("-"*30)
+                    opcion1_2 = input("Escriba la localidad a buscar (Si desea volver al menu anterior ingrese '0'): ").strip().upper()
+                    if opcion1_2 == "0":
                         break
-                    elif opcion1_2 == 1:
-                        input("Escriba la localidad a buscar: ")
-                        # CONTINUAR
+                    elif len(opcion1_2) < 3:
+                        print("Opcion invalida. Escriba tres o mas caracteres.")       
                     else:
-                        print("Opcion invalida.")
-                        continue
+                        for municipio in self.lista_municipios:
+                            if encontrado:
+                                break
+                            for localidad in municipio.local:
+                                if opcion1_2 in localidad.local.upper(): 
+                                    print(f"""Municipio seleccionado: {municipio.nombre}
+Localidad seleccionada: {localidad.local}""")
+                                    # CONSULTAR API
+                                    encontrado = True
+                                    break
+                        if not encontrado:
+                            print("Opcion invalida. No se encontro coincidencias.")
             else:
                 print("Opcion invalida.")
                 continue
