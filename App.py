@@ -7,7 +7,7 @@ class App():
     def start(self):
         self.read()
         self.ver_coord()
-        self.menu()
+        self.menu_p()
 
     def read(self):
         with open("zonas_caracas.json", "r", encoding="utf-8") as z:
@@ -43,7 +43,7 @@ class App():
         Porcentaje de localidades con coordenadas: {round(porcentaje_local_coord, 2)}%
     """)
 
-    def menu(self):
+    def menu_p(self):
         while True:
             print(f"""{"-"*30}
 0. Cerrar programa
@@ -55,32 +55,74 @@ class App():
             if opcion == 0:
                 break
             elif opcion == 1:
-                while True:
-                    print(f"""{"-"*30}
+                self.menu1()
+            elif opcion == 2:
+                self.menu2()
+            elif opcion == 3:
+                self.menu3()
+            else:
+                print("Opcion invalida.")
+                continue
+
+
+    def menu1(self):
+        while True:
+            print(f"""{"-"*30}
 Consulta del clima en tiempo real:
 0. Volver al menu anterior
 1. Por municipio y localidad
 2. Mediante busqueda directa por nombre de localidad
 """)
-                    opcion1_1 = int(input("Seleccione una opcion: "))
-                    if opcion1_1 == 0:
-                        break
-                    if opcion1_1 == 1:
-                        while True:
-                            print(f"""{"-"*30}
+            opcion1_1 = int(input("Seleccione una opcion: "))
+            if opcion1_1 == 0:
+                break
+            elif opcion1_1 == 1:
+                while True:
+                    print(f"""{"-"*30}
 0. Volver al menu anterior""")
-                            for municipio in self.lista_municipios:
-                                num_opcion = self.lista_municipios.index(municipio) +1
-                                print(f"{num_opcion}. {municipio.nombre}")
-                            opcion1_1_n = int(input("Seleccione una opcion: "))
-                            if opcion1_1_n == 0:
-                                break
-                            elif not (opcion1_1_n > 0 and opcion1_1_n <= len(self.lista_municipios)):
-                                print("Opcion invalida.")
-                                continue
-                            else: 
-                                municipio_selecc = self.lista_municipios[opcion1_1_n -1]
-                                print("Municipio seleccionado: ", municipio_selecc.nombre)
+                    for municipio in self.lista_municipios:
+                        num_opcion = self.lista_municipios.index(municipio) +1
+                        print(f"{num_opcion}. {municipio.nombre}")
+                    opcion1_1_n = int(input("Seleccione una opcion: "))
+                    if opcion1_1_n == 0:
+                            break
+                    elif not (opcion1_1_n > 0 and opcion1_1_n <= len(self.lista_municipios)):
+                            print("Opcion invalida.")
+                            continue
+                    else: 
+                            municipio_selecc = self.lista_municipios[opcion1_1_n -1]
+                            while True:
+                                print(F"""{"-"*30}
+0. Volver al menu anterior
+Municipio seleccionado: {municipio_selecc.nombre}""")
+                                num_opcion2 = 1
+                                for localidad in municipio_selecc.local:
+                                    if localidad.lat and localidad.long != None:
+                                        print(f"{num_opcion2}. {localidad.local}")
+                                        num_opcion2 += 1
+                                opcion1_1_local = int(input("Seleccione una opcion: "))
+                                if opcion1_1_local == 0:
+                                    break
+                                elif not (opcion1_1_local > 0 and opcion1_1_local <= num_opcion2):
+                                    print("Opcion invalida.")
+                                    continue
+                                else: 
+                                    localidad_selecc = municipio_selecc.local[opcion1_1_local -1]
+                                    # CONTINUAR
+            elif opcion1_1 == 2:
+               while True:
+                    print(f"""{"-"*30}
+0. Volver al menu anterior
+1. Ingrese el nombre de una localidad.""") 
+                    opcion1_2 = int(input("Sdleccione una opcion: "))
+                    if opcion1_2 == 0:
+                        break
+                    elif opcion1_2 == 1:
+                        input("Escriba la localidad a buscar: ")
+                        # CONTINUAR
+                    else:
+                        print("Opcion invalida.")
+                        continue
             else:
-                print("Opcion invalida")
+                print("Opcion invalida.")
                 continue
