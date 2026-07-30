@@ -11,3 +11,9 @@ class Localidad:
         self.local = local # -> str
         self.lat = lat # -> float
         self.long = long # -> float
+
+class RegistroConsulta:
+    def __init__ (self, municipio, localidad, temperatura):
+        self.municipio = municipio # str
+        self.localidad = localidad #str
+        self.temperatura = temperatura #float
