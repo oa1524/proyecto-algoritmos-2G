@@ -3,6 +3,7 @@ from classes import *
 
 class App():
     lista_municipios = []
+    lista_registro = []
 
     def start(self):
         self.read()
@@ -134,29 +135,69 @@ Localidad seleccionada: {localidad.local}""")
             else:
                 print("Opcion invalida.")
                 continue
+    def menu2(self):
+        while True:
+            print(f"""{"-"*30} 
+Reportes y estadisticas:
+0. Volver al menu anterior
+1. Consultar ranking de temperaturas
+2. Cobertura geografica
+3. Promedio general""")
 
-    lista_registro = []
-    nuevo_registro = RegistroConsulta
-    lista_registro.append (nuevo_registro)
+            opcion2= input('Seleccione una opcion:')
+
+            if opcion2 == "0":
+                break
+            elif opcion2== "1":
+                self.ranking_temperatura ()
+            elif opcion2== "2":
+                self.cobertura_geografica()
+            elif opcion2 == "3":
+                self.promedio()
+            else:
+                print("Opcion invalida. Escriba un numero del 0-3")
+
 
     def ranking_temperatura (self):
-        print (f'{"-"*30} \n "Comparacion de temperaturas consultadas" \n {"-"*30}')
+     print (f'{"-"*30} \n Comparacion de temperaturas consultadas ')
+ 
+     if len(self.lista_registro)==0:
+      print ('No se puede realizar la comparacion ya que no se ha buscado nada')
+      return
+    #hasta aqui sirve lo de abajo es con la api 
 
-        if len(self.lista_registro)==0:
-           print ('No se puede realizar la comparacion ya que no se ha buscado nada')
-           return
+     mas_calida = self.lista_registro[0]
+     mas_fria = self.lista_registro[0]
 
-        mas_calida = self.lista_registro[0]
-        mas_fria = self.lista_registro[0]
+     for registro in self.lista_registro:
+        if registro.temperatura > mas_calida.temperatura:
+             mas_calida = registro
+ 
+        if registro.temperatura < mas_fria.temperatura:
+             mas_fria = registro
 
-        for registro in self.lista_registro:
-            if registro.temperatura > mas_calida.temperatura:
-                mas_calida = registro
+     print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
+     print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temperatura} grados c')
 
-            if registro.temperatura < mas_fria.temperatura:
-                mas_fria = registro
+    def cobertura_geografica(self):
+        print(f"""{"-"*30} \n Localidades sin coordenadas""")
 
-        print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
-        print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temepratura} grados c')
-                
-       
+        for municipio in self.lista_municipios:
+            sin_coordenadas=[]
+            for localidad in municipio.local:
+                if localidad.lat or localidad.long == None:
+                    sin_coordenadas.append(localidad.local)
+            if len(sin_coordenadas) >0:
+                print (f"{'-'*30}\nMunicipio:{municipio.nombre}")
+                for nombre_loc in sin_coordenadas:
+                    print (f"{nombre_loc}")
+
+    def registrar_consulta (self, municipio, localidad, temperatura):
+        nuevo_registro = RegistroConsulta(municipio, localidad, temperatura)
+        self.lista_registro.append(nuevo_registro)
+
+    def menu3(self):
+        print(f"""{"-"*30}
+Historicos:
+0. Volver al menu anterior
+1. Consulta por periodo de tiempo """)
