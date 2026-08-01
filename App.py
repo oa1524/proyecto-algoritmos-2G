@@ -1,5 +1,8 @@
 import json
 from classes import *
+import requests
+from datetime import datetime
+from dicc_wmo import WEATHER_CODES
 
 class App():
     lista_municipios = []
@@ -31,7 +34,7 @@ class App():
             cant_local_nocoord = 0
             for localidad in municipio.local:
                 cant_local+=1
-                if localidad.lat and localidad.long != None:
+                if localidad.lat is not None and localidad.long is not None:
                     cant_local_coord+=1
                 else:
                     cant_local_nocoord+=1
@@ -97,19 +100,24 @@ Consulta del clima en tiempo real:
 0. Volver al menu anterior
 Municipio seleccionado: {municipio_selecc.nombre}""")
                                 num_opcion2 = 0
+                                lista_municipios_filt = []
                                 for localidad in municipio_selecc.local:
-                                    if localidad.lat and localidad.long != None:
+                                    if localidad.lat is not None and localidad.long is not None:
                                         num_opcion2 += 1
                                         print(f"{num_opcion2}. {localidad.local}")
+                                        lista_municipios_filt.append(localidad)
                                 opcion1_1_local = int(input("Seleccione una opcion: "))
+
                                 if opcion1_1_local == 0:
                                     break
                                 elif not (opcion1_1_local > 0 and opcion1_1_local <= num_opcion2):
                                     print("Opcion invalida.")
                                     continue
                                 else: 
-                                    localidad_selecc = municipio_selecc.local[opcion1_1_local -1]
-                                    # CONTINUAR
+                                    localidad_selecc = lista_municipios_filt[opcion1_1_local -1]
+                                    temperatura_localidad = self.consulta_api(municipio_selecc.nombre, localidad_selecc.local, localidad_selecc.lat, localidad_selecc.long)
+                                    self.registrar_consulta(municipio_selecc.nombre, localidad_selecc.local, temperatura_localidad)
+                                    
             elif opcion1_1 == 2:
                 while True:
                     encontrado = False
@@ -125,9 +133,8 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                                 break
                             for localidad in municipio.local:
                                 if opcion1_2 in localidad.local.upper(): 
-                                    print(f"""Municipio seleccionado: {municipio.nombre}
-Localidad seleccionada: {localidad.local}""")
-                                    # CONSULTAR API
+                                    temperatura_localidad = self.consulta_api(municipio.nombre, localidad.local, localidad.lat, localidad.long)
+                                    self.registrar_consulta(municipio.nombre, localidad.local, temperatura_localidad)
                                     encontrado = True
                                     break
                         if not encontrado:
@@ -135,6 +142,33 @@ Localidad seleccionada: {localidad.local}""")
             else:
                 print("Opcion invalida.")
                 continue
+
+    def consulta_api(self, municipio, localidad, latitud, longitud):
+        if latitud is None or longitud is None:
+            print("No se posee datos de latitud y longitud.")
+        else:
+            url = f"https://api.open-meteo.com/v1/forecast?latitude={latitud}&longitude={longitud}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=America%2FNew_York&forecast_days=1"
+            consulta = requests.get(url)
+            dicc = consulta.json()
+            wmo = dicc['current']['weather_code']
+            time = dicc['current']['time']
+            hora_actual = datetime.fromisoformat(time).time()
+            fecha_actual = datetime.fromisoformat(time).date()
+            print(f"""{"-"*30}
+Fecha: {fecha_actual}
+Hora: {hora_actual}
+Nombre de municipio: {municipio}
+Nombre de localidad: {localidad}
+Latitud: {latitud}
+Longitud: {longitud}
+Temperatura actual: {dicc['current']['temperature_2m']}°C
+Humedad relativa: {dicc['current']['relative_humidity_2m']}%
+Velocidad del viento: {dicc['current']['wind_speed_10m']} km/h
+Estado del tiempo: {WEATHER_CODES[wmo]}
+    """)
+            return dicc['current']['temperature_2m']
+
+    
     def menu2(self):
         while True:
             print(f"""{"-"*30} 
@@ -171,10 +205,10 @@ Reportes y estadisticas:
 
      for registro in self.lista_registro:
         if registro.temperatura > mas_calida.temperatura:
-             mas_calida = registro
+            mas_calida = registro
  
         if registro.temperatura < mas_fria.temperatura:
-             mas_fria = registro
+            mas_fria = registro
 
      print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
      print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temperatura} grados c')
@@ -185,12 +219,12 @@ Reportes y estadisticas:
         for municipio in self.lista_municipios:
             sin_coordenadas=[]
             for localidad in municipio.local:
-                if localidad.lat or localidad.long == None:
+                if localidad.lat is None or localidad.long is None:
                     sin_coordenadas.append(localidad.local)
             if len(sin_coordenadas) >0:
                 print (f"{'-'*30}\nMunicipio:{municipio.nombre}")
                 for nombre_loc in sin_coordenadas:
-                    print (f"{nombre_loc}")
+                    print (f"- {nombre_loc}")
 
     def registrar_consulta (self, municipio, localidad, temperatura):
         nuevo_registro = RegistroConsulta(municipio, localidad, temperatura)
