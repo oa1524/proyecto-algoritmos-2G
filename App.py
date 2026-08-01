@@ -261,13 +261,27 @@ Historicos:
         if opcion3 =='0':
             self.menu_p
         elif opcion3=='1':
-
-            self.consulta_periodo_tiempo()
+           opcion4=input('Escriba el nombre de la localidad: ').lower().strip()
+           localidad_hallada=None
+           for municipio in  self.lista_municipios:
+               for loc in municipio.local:
+                   if opcion4 in loc.local.upper():
+                       localidad_hallada=loc
+                       break
+               if localidad_hallada:
+                   break
+           if localidad_hallada is None:
+               print ('Localidad no encontrada')
+           else:
+             print(f'Localidad hallada: {localidad_hallada.local}')
+             fecha_inicio=input('Ingrese fecha de inicio (AAAA-MM-DD): ')
+             fecha_fin=input('Ingrese fecha de fin (AAAA-MM-DD): ')
+             df_datos= self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
+             self.procesar_historicos(localidad_hallada.local, df_datos)
+                
         else:
             print('Opcion no valida')
             self.menu3
-
-    def consulta_periodo_tiempo(self):
 
     def obtener_historicos_api(self, lat, long, fecha_inicio, fecha_fin):
         url=f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={long}&start_date={fecha_inicio}&end_date={fecha_fin}&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=auto"
@@ -277,3 +291,6 @@ Historicos:
         df= pd.DataFrame(datos['daily'])
         df['time']= pd.to_datetime(df["time"])
         return df 
+
+    def procesar_historicos(self):
+
