@@ -3,6 +3,8 @@ from classes import *
 import requests
 from datetime import datetime
 from dicc_wmo import WEATHER_CODES
+import pandas as pd
+import matplotlib as plt
 
 class App():
     lista_municipios = []
@@ -187,9 +189,10 @@ Reportes y estadisticas:
             elif opcion2== "2":
                 self.cobertura_geografica()
             elif opcion2 == "3":
-                self.promedio()
+                self.promedio_temperaturas()
             else:
                 print("Opcion invalida. Escriba un numero del 0-3")
+                self.menu2()
 
 
     def ranking_temperatura (self):
@@ -198,7 +201,6 @@ Reportes y estadisticas:
      if len(self.lista_registro)==0:
       print ('No se puede realizar la comparacion ya que no se ha buscado nada')
       return
-    #hasta aqui sirve lo de abajo es con la api 
 
      mas_calida = self.lista_registro[0]
      mas_fria = self.lista_registro[0]
@@ -212,6 +214,7 @@ Reportes y estadisticas:
 
      print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
      print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temperatura} grados c')
+
 
     def cobertura_geografica(self):
         print(f"""{"-"*30} \n Localidades sin coordenadas""")
@@ -230,8 +233,47 @@ Reportes y estadisticas:
         nuevo_registro = RegistroConsulta(municipio, localidad, temperatura)
         self.lista_registro.append(nuevo_registro)
 
+    def promedio_temperaturas(self):
+        print(f'''{'-'*30}\n Promedio de temperaturas consultadas''')
+        cant_registros=len(self.lista_registro)
+        if cant_registros==0:
+            print('No se puede realizar el promedio ya que no hay consultas')
+            return
+        datos= [
+            {
+              'municipio': reg.municipio,
+              'localidad': reg.localidad,
+              'temperatura': reg.temperatura
+             }
+             for reg in self.lista_registro
+          ]
+        df=pd.DataFrame(datos)
+        promedio= df['temperatura'].mean()
+        print(f'Total de consultas realizadas: {len(df)}')
+        print(f'Promedio de temperatura: {promedio:.2f} grados c')
+
     def menu3(self):
         print(f"""{"-"*30}
 Historicos:
 0. Volver al menu anterior
 1. Consulta por periodo de tiempo """)
+        opcion3=input('Seleccione una opcion: ')
+        if opcion3 =='0':
+            self.menu_p
+        elif opcion3=='1':
+
+            self.consulta_periodo_tiempo()
+        else:
+            print('Opcion no valida')
+            self.menu3
+
+    def consulta_periodo_tiempo(self):
+
+    def obtener_historicos_api(self, lat, long, fecha_inicio, fecha_fin):
+        url=f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={long}&start_date={fecha_inicio}&end_date={fecha_fin}&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=auto"
+        res= requests.get(url)
+        datos= res.json()
+
+        df= pd.DataFrame(datos['daily'])
+        df['time']= pd.to_datetime(df["time"])
+        return df 
