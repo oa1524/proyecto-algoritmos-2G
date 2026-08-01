@@ -196,24 +196,24 @@ Reportes y estadisticas:
 
 
     def ranking_temperatura (self):
-     print (f'{"-"*30} \n Comparacion de temperaturas consultadas ')
- 
-     if len(self.lista_registro)==0:
-      print ('No se puede realizar la comparacion ya que no se ha buscado nada')
-      return
+        print (f'{"-"*30} \n Comparacion de temperaturas consultadas ')
+    
+        if len(self.lista_registro)==0:
+            print ('No se puede realizar la comparacion ya que no se ha buscado nada')
+            return
 
-     mas_calida = self.lista_registro[0]
-     mas_fria = self.lista_registro[0]
+        mas_calida = self.lista_registro[0]
+        mas_fria = self.lista_registro[0]
 
-     for registro in self.lista_registro:
-        if registro.temperatura > mas_calida.temperatura:
-            mas_calida = registro
- 
-        if registro.temperatura < mas_fria.temperatura:
-            mas_fria = registro
+        for registro in self.lista_registro:
+            if registro.temperatura > mas_calida.temperatura:
+                mas_calida = registro
+    
+            if registro.temperatura < mas_fria.temperatura:
+                mas_fria = registro
 
-     print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
-     print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temperatura} grados c')
+        print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
+        print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temperatura} grados c')
 
 
     def cobertura_geografica(self):
@@ -293,4 +293,4 @@ Historicos:
         return df 
 
     def procesar_historicos(self):
-
+        pass
