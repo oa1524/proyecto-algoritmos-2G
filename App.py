@@ -302,4 +302,55 @@ Historicos:
 
         return df 
 
-   # def procesar_historicos(self):
+    def procesar_historicos(self,localidad_nombre, df):
+        df['anio']=df['time'].dt.year
+        df['anio_mes']=df['time'].dt.strftime('%Y-%m')
+        
+        print(f'''{'-'*30} Datos mensuales historicos: {localidad_nombre}''')
+        meses_unicos=df['mes'].unique()
+
+        for m in meses_unicos:
+            df_mes=df[df['mes']==m]
+
+            print(f'''Mes: {m}
+Temperatura promedio: {df_mes['temperatura'].mean():.2f} grados c
+Humedad relativa promedio: {df_mes['humedad'].mean():.2f}%
+Precipitacion acomulada promedio: {df_mes['precipitacion'].sum():.2f} mm
+Velocidad del viento promedio: {df_mes['viento'].mean():.2f} km/h ''')
+
+            print(f'''Promedios generales del periodo
+Temperatura media: {df['temperatura'].mean():.2f} grados c
+Humedad relativa media: {df['humedad'].mean():.2f}%
+Precipitacion media diaria: {df['precipitacion'].mean():.2f} mm
+Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
+
+        anios_unicos=df['anio'].uniqque()
+
+        max_temp, caluroso_anio=-999, None
+        min_temp, fresco_anio=900, None
+        max_lluvia, lluvias_anio=-1, None
+        max_humedad, humedo_anio=-1, None
+
+        datos_anuales={
+            'anio':[],
+            'temperatura':[],
+            'humedad':[],
+            'precipitacion':[],
+            'viento':[]
+        }
+        for a in anios_unicos:
+            df_a=df[df['anio']==a]
+            t_prom=df_a['temperatura'].mean()
+            h_prom=df_a['humedad'].mean()
+            p_prom=df_a['precipitacion'].mean()
+            v_prom=df_a['viento'].mean()
+
+            datos_anuales['anio'].append(str(a))
+            datos_anuales['temperatura'].append(t_prom)
+            datos_anuales['humedad'].append(h_prom)
+            datos_anuales['precipitacion'].append(p_prom)
+            datos_anuales['viento'].append(v_prom)
+
+            
+
+
