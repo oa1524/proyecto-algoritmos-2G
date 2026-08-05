@@ -290,7 +290,36 @@ Historicos:
 
         df= pd.DataFrame(datos['daily'])
         df['time']= pd.to_datetime(df["time"])
+
+        #renombrar las columnas para no usar los nombres largos que da la API
+
+        df= pd.rename(columns={
+            'temperature_2m_mean':'temperatura',
+            'relative_humidity_2m_mean': 'humedad',
+            'precipitacion_sum':'precipitacion',
+            'wind_speed_10m_max': 'viento'
+        })
+
         return df 
 
-    def procesar_historicos(self):
+    def procesar_historicos(self, localidad_nombre, df):
+        df['anio']=df['time'].dt.year
+        df['anio_mes']=df['time'].dt.strftime('%Y-%m')
 
+
+        print(f'''{'-'*30} Datos mensuales historicos: {localidad_nombre}''')
+        meses_unicos=df['mes'].unique()
+        for m in meses_unicos:
+            df_mes=df[df['mes']==m]
+            print(f''' Mes: {m}
+Temperatura promedio: {df_mes['temperatura'].mean():.2f} grados c
+Humedad relativa promedio: {df_mes['humedad'].mean():.2f} %
+Precipitacion acomulada promedio: {df_mes['precipitacion'].sum():.2f} mm
+Velocidad del viento promedio: {df_mes['viento'].mean():.2f} km/h ''')
+
+        print(f'''{'-'*30} Promedios generales del periodo
+Temperatura media: {df['temperatura'].mean():.2f}) grados c
+Humedad relativa media: {df['humedad'].mean():.2f} %
+Precipitacion media diaria: {df['precipitacion'].mean():.2f} mm
+Velocidad del viento media: {df['temperatura'].mean():.2f} km/h''')
+        
