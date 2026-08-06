@@ -3,7 +3,7 @@ from classes import *
 import requests
 from dicc_wmo import WEATHER_CODES
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 class App():
     lista_municipios = []
@@ -274,6 +274,11 @@ Reportes y estadisticas:
         print(f'Total de consultas realizadas: {len(df)}')
         print(f'Promedio de temperatura: {promedio:.2f} grados c')
 
+    '''
+    Metodo que genera el menu de consultas historicas (opcion 3 del menu principal).
+    Permite al usuario consultar el historial de datos meteorologicos de una localidad dentro de un rango de fechas especificas.
+    Llama a la API y procesa los datos y muestra resultados y graficos.
+    '''
     def menu3(self):
         print(f"""{"-"*30}
 Historicos:
@@ -299,12 +304,17 @@ Historicos:
                 fecha_inicio=input('Ingrese fecha de inicio (AAAA-MM-DD): ')
                 fecha_fin=input('Ingrese fecha de fin (AAAA-MM-DD): ')
                 df_datos= self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
-                # self.procesar_historicos(localidad_hallada.local, df_datos)
-                
+                self.procesar_historicos(localidad_hallada.local, df_datos)        
+
         else:
             print('Opcion no valida')
             self.menu3
-
+    '''
+    Metodo que realiza la peticion de datos a la API.
+    Recibe las coordenadas geograficas de la localidad y el rango de fechas.
+    Devuelve el data frame de pandas renombras con nombres mas cortos para su procesamiento.
+    Utiliza pandas.
+    '''
     def obtener_historicos_api(self, lat, long, fecha_inicio, fecha_fin):
         url=f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={long}&start_date={fecha_inicio}&end_date={fecha_fin}&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=America%2FNew_York"
         res= requests.get(url)
@@ -315,18 +325,24 @@ Historicos:
 
         #renombrar las columnas para no usar los nombres largos que da la API
 
-        df= pd.rename(columns={
+        df= df.rename(columns={
             'temperature_2m_mean':'temperatura',
             'relative_humidity_2m_mean': 'humedad',
-            'precipitacion_sum':'precipitacion',
+            'precipitation_sum':'precipitacion',
             'wind_speed_10m_max': 'viento'
         })
 
         return df 
 
+    '''
+    Metodo utilizado para procesar la data historica de la API.
+    Calcula y muestra en consola las estadisticas agrupadas por mes, los promedios generales y un resumen de datos anual.
+    Invoca el metodo para graficar.
+    Utiliza pandas.
+    '''
     def procesar_historicos(self,localidad_nombre, df):
         df['anio']=df['time'].dt.year
-        df['anio_mes']=df['time'].dt.strftime('%Y-%m')
+        df['mes']=df['time'].dt.strftime('%Y-%m')
         
         print(f'''{'-'*30} Datos mensuales historicos: {localidad_nombre}''')
         meses_unicos=df['mes'].unique()
@@ -334,7 +350,7 @@ Historicos:
         for m in meses_unicos:
             df_mes=df[df['mes']==m]
 
-            print(f'''Mes: {m}
+            print(f'''{'-'*30}Mes: {m}
 Temperatura promedio: {df_mes['temperatura'].mean():.2f} grados c
 Humedad relativa promedio: {df_mes['humedad'].mean():.2f}%
 Precipitacion acomulada promedio: {df_mes['precipitacion'].sum():.2f} mm
@@ -346,7 +362,7 @@ Humedad relativa media: {df['humedad'].mean():.2f}%
 Precipitacion media diaria: {df['precipitacion'].mean():.2f} mm
 Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
 
-        anios_unicos=df['anio'].uniqque()
+        anios_unicos=df['anio'].unique()
 
         max_temp, caluroso_anio=-999, None
         min_temp, fresco_anio=900, None
@@ -373,6 +389,62 @@ Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
             datos_anuales['precipitacion'].append(p_prom)
             datos_anuales['viento'].append(v_prom)
 
-            
+            if t_prom>max_temp:
+                max_temp=t_prom
+                caluroso_anio=a
 
+            if t_prom<min_temp:
+                min_temp=t_prom
+                fresco_anio=a
 
+            if p_prom>max_lluvia:
+                max_lluvia=p_prom
+                lluvias_anio=a
+
+            if h_prom>max_humedad:
+                max_humedad=h_prom
+                humedo_anio=a
+
+        print(f'''{'-'*30} Resumen de anios:
+Anio mas caluroso: {caluroso_anio} ({max_temp:.2f} grados c) 
+Anio mas fresco: {fresco_anio} ({min_temp:.2f} grados c)  
+Anio con mayor precipitacion acomulada: {lluvias_anio} ({max_lluvia:.2f} mm)
+Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
+
+        df_anual=pd.DataFrame(datos_anuales)
+
+        self.graficar_historicos(df_anual)
+
+    ''' 
+    Metodo que genera el grafico de los datos anuales.
+    Crea una figura con cuatro subgraficos comparativos a lo largo de los anios seleccionados.
+    Utiliza matplotlib.
+    '''
+    def graficar_historicos(self, df_anual):
+
+        fig, axs= plt.subplots(4,1, figsize=(9,9), sharex=True)
+        fig.suptitle('Evolucion anual', fontsize=14)
+
+        #Temperatura
+        axs[0].plot(df_anual['anio'], df_anual['temperatura'], marker='*', color='purple')
+        axs[0].set_ylabel('temp (grados c)')
+        axs[0].grid(True)
+
+        #Humedad
+        axs[1].plot(df_anual['anio'], df_anual['humedad'], marker='*', color='steelblue')
+        axs[1].set_ylabel('humedad (%)')
+        axs[1].grid(True)
+
+        #Precipitacion
+        axs[2].plot(df_anual['anio'], df_anual['precipitacion'], marker='*', color='green')
+        axs[2].set_ylabel('precip. total (mm)')
+        axs[2].grid(True)
+
+        #Velocidad del viento
+        axs[3].plot(df_anual['anio'], df_anual['viento'], marker='*', color='red')
+        axs[3].set_ylabel('viento (km/h)')
+        axs[3].set_xlabel('anio')
+        axs[3].grid(True)
+
+        plt.tight_layout()
+        plt.show()
