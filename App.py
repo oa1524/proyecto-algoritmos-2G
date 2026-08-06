@@ -1,7 +1,6 @@
 import json
 from classes import *
 import requests
-from datetime import datetime
 from dicc_wmo import WEATHER_CODES
 import pandas as pd
 import matplotlib as plt
@@ -10,11 +9,19 @@ class App():
     lista_municipios = []
     lista_registro = []
 
+    '''
+    Metodo principal que llama a ejecutar el resto de los metodos de la clase para el
+    funcionamiento del programa.
+    '''
     def start(self):
         self.read()
         self.ver_coord()
         self.menu_p()
 
+    '''
+    Metodo read hecho para leer zonas_caracas.json y organizar su data creando los objetos que le
+    correspondan respectivamente. 
+    '''
     def read(self):
         with open("zonas_caracas.json", "r", encoding="utf-8") as z:
             zonas = json.load(z)
@@ -29,6 +36,9 @@ class App():
             lista_municipios.append(municipio_obj)
         self.lista_municipios = lista_municipios
 
+    '''
+    Metodo utilizado para generar el reporte inicial del programa (Requerimiento 1 Carga de datos)
+    '''
     def ver_coord(self):
         for municipio in self.lista_municipios:
             cant_local = 0
@@ -49,6 +59,10 @@ class App():
         Porcentaje de localidades con coordenadas: {round(porcentaje_local_coord, 2)}%
     """)
 
+    '''
+    Metodo que genera el menu principal del programa y evalua que opcion selecciona el usuario
+    llamando respectivamente al resto de los menus.
+    '''
     def menu_p(self):
         while True:
             print(f"""{"-"*30}
@@ -70,7 +84,15 @@ class App():
                 print("Opcion invalida.")
                 continue
 
-
+    '''
+    Metodo que genera el menu1, el cual realiza todo el Requerimiento 2: Consulta del clima en tiempo real.
+        1. Por municipio y localidad: despliegua la lista de municipios, luego sus localidades, segun
+    la seleccion del usuario consulta la API e imprime la informacion obtenida, registrando la consulta 
+    como un objeto de clase RegistroConsulta.
+        2. Mediante busqueda directa por nombre de localidad: el usuario introduce caracteres, si el programa
+    encuentra coincidencias, consulta la API e imprime la informacion obtenida, registrando la consulta 
+    como un objeto de clase RegistroConsulta.
+    '''
     def menu1(self):
         while True:
             print(f"""{"-"*30}
@@ -145,6 +167,11 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                 print("Opcion invalida.")
                 continue
 
+    '''
+    Primer metodo de consulta a la API que devuelve e imprime los detalles meteorológicos de la localidad
+    consultada por el usuario y colocada con sus especificaciones en los argumentos de este metodo. Tambien,
+    devuelve el valor de temperatura para poder ser usado en el menu2. (Reportes y Estadisticas)
+    '''
     def consulta_api(self, municipio, localidad, latitud, longitud):
         if latitud is None or longitud is None:
             print("No se posee datos de latitud y longitud.")
@@ -153,12 +180,7 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
             consulta = requests.get(url)
             dicc = consulta.json()
             wmo = dicc['current']['weather_code']
-            time = dicc['current']['time']
-            hora_actual = datetime.fromisoformat(time).time()
-            fecha_actual = datetime.fromisoformat(time).date()
             print(f"""{"-"*30}
-Fecha: {fecha_actual}
-Hora: {hora_actual}
 Nombre de municipio: {municipio}
 Nombre de localidad: {localidad}
 Latitud: {latitud}
@@ -229,6 +251,10 @@ Reportes y estadisticas:
                 for nombre_loc in sin_coordenadas:
                     print (f"- {nombre_loc}")
 
+    '''
+    Metodo usado para crear un objeto de clase RegistroConsulta con la informacion de 
+    consulta obtenida del usuario, para poder usarla posteriormente.
+    '''
     def registrar_consulta (self, municipio, localidad, temperatura):
         nuevo_registro = RegistroConsulta(municipio, localidad, temperatura)
         self.lista_registro.append(nuevo_registro)

@@ -1,3 +1,8 @@
+'''
+Diccionario de codigos de estado de clima. Sus keys son los codigos en wmo y sus values lo que representan.
+Se utiliza en App.py en menu1 para poder imprimir correctamente el estado del clima tras consultar la API.
+'''
+
 WEATHER_CODES = {
 0: "Despejado",
 1: "Mayormente despejado",

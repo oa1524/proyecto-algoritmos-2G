@@ -1,6 +1,11 @@
 import json
 from classes import *
 
+'''
+Funcion read hecha para leer zonas_caracas.json y organizar su data creando los objetos que le
+correspondan respectivamente. 
+Esta funcion se coloco posteriormentet en App.py para mayor orden.
+'''
 def read():
     with open("zonas_caracas.json", "r", encoding="utf-8") as z:
         zonas = json.load(z)

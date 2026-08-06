@@ -1,3 +1,8 @@
+'''
+Funcion utilizada para generar el reporte inicial del programa.
+Esta funcion se coloco posteriormente en App.py para mayor orden.
+'''
+
 def ver_coord(list_municipios):
     for municipio in list_municipios:
         cant_local = 0
@@ -5,7 +10,7 @@ def ver_coord(list_municipios):
         cant_local_nocoord = 0
         for localidad in municipio.local:
             cant_local+=1
-            if localidad.lat and localidad.long != None:
+            if localidad.lat is not None and localidad.long is not None:
                 cant_local_coord+=1
             else:
                 cant_local_nocoord+=1
