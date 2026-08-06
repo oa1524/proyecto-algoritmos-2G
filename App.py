@@ -192,7 +192,11 @@ Estado del tiempo: {WEATHER_CODES[wmo]}
     """)
             return dicc['current']['temperature_2m']
 
-    
+    '''
+    Metodo que genera el menu de reportes y estadisticas (opcion 2 del menu principal).
+    Permite seleccionar entre consultar ranking de temperaturas, ver la cobertura geografica sin coordenadas o 
+    calcular el promedio de las consultas realizadas.
+    '''
     def menu2(self):
         while True:
             print(f"""{"-"*30} 
@@ -216,7 +220,11 @@ Reportes y estadisticas:
                 print("Opcion invalida. Escriba un numero del 0-3")
                 self.menu2()
 
-
+    '''
+    Metodo encargado de evaluar las consultas realizadas que estan en el historial de registro.
+    Determina e imprime la localidad que tiene la temperatura mas fria y la mas calida.
+    Si no existen registros previo lo informa.
+    '''
     def ranking_temperatura (self):
         print (f'{"-"*30} \n Comparacion de temperaturas consultadas ')
     
@@ -237,7 +245,10 @@ Reportes y estadisticas:
         print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
         print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temperatura} grados c')
 
-
+    '''
+    Metodo que recorre la lista de municipios y sus localidades para identificar las que no poseen coordenadas.
+    Imprime en pantalla las localidades sin coordenads ordenadas por municipio.
+    '''
     def cobertura_geografica(self):
         print(f"""{"-"*30} \n Localidades sin coordenadas""")
 
@@ -251,10 +262,18 @@ Reportes y estadisticas:
                 for nombre_loc in sin_coordenadas:
                     print (f"- {nombre_loc}")
 
+    '''
+    Metodo auxiliar que crea un objeto de la clase registro consulta con los datos de una busqueda y 
+    lo guarda en un lista de registro que es usada otras funciones.
+    '''
     def registrar_consulta (self, municipio, localidad, temperatura):
         nuevo_registro = RegistroConsulta(municipio, localidad, temperatura)
         self.lista_registro.append(nuevo_registro)
 
+    '''
+    Metodo que procesa el historial de consultas(lista) y lo transforma en un data frame de pandas.
+    Calcula e imprime el promedio general de temperaturas obtenidas en la consulta.
+    '''
     def promedio_temperaturas(self):
         print(f'''{'-'*30}\n Promedio de temperaturas consultadas''')
         cant_registros=len(self.lista_registro)
