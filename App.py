@@ -251,10 +251,6 @@ Reportes y estadisticas:
                 for nombre_loc in sin_coordenadas:
                     print (f"- {nombre_loc}")
 
-    '''
-    Metodo usado para crear un objeto de clase RegistroConsulta con la informacion de 
-    consulta obtenida del usuario, para poder usarla posteriormente.
-    '''
     def registrar_consulta (self, municipio, localidad, temperatura):
         nuevo_registro = RegistroConsulta(municipio, localidad, temperatura)
         self.lista_registro.append(nuevo_registro)
