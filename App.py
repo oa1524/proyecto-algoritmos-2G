@@ -4,6 +4,7 @@ import requests
 from dicc_wmo import WEATHER_CODES
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime 
 
 class App():
     lista_municipios = []
@@ -320,10 +321,23 @@ Historicos:
                 print ('Localidad no encontrada')
             else:
                 print(f'Localidad hallada: {localidad_hallada.local}')
-                fecha_inicio=input('Ingrese fecha de inicio (AAAA-MM-DD): ')
-                fecha_fin=input('Ingrese fecha de fin (AAAA-MM-DD): ')
+                while True:
+                    fecha_inicio=input('Ingrese fecha de inicio (AAAA-MM-DD): ')
+                    try:
+                        datetime.strptime(fecha_inicio, '%Y-%m-%d')
+                        break
+                    except ValueError:
+                        print('Error: ingrese una fecha valida en el formato (AAAA-MM-DD)')
+                while True:
+                    fecha_fin=input('Ingrese fecha de fin (AAAA-MM-DD): ')
+                    try:
+                        datetime.strptime(fecha_fin, '%Y-%m-%d')
+                        break
+                    except ValueError:
+                        print('Error: ingrese una fecha valida en el formato (AAAA-MM-DD)')
                 df_datos= self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
-                self.procesar_historicos(localidad_hallada.local, df_datos)        
+                if df_datos is not None:
+                    self.procesar_historicos(localidad_hallada.local, df_datos)        
 
         else:
             print('Opcion no valida')
