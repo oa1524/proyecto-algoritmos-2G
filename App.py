@@ -367,7 +367,8 @@ Historicos:
                 
                 lista_objetos = self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
                 if lista_objetos:
-                    df_datos = pd.DataFrame([reg.__dic__ for reg in lista_objetos])  
+                    datos_dict = [obj.__dict__ for obj in lista_objetos]
+                    df_datos = pd.DataFrame(datos_dict)  
                     self.procesar_historicos(localidad_hallada.local, df_datos)  
 
         else:
@@ -410,14 +411,14 @@ Historicos:
 
              for i in range(len(daily['time'])):
                  registro = Historico(
-                     fehca = daily['time'][i],
+                     fecha = daily['time'][i],
                      temperatura = daily['temperature_2m_mean'][i],
                      humedad = daily['relative_humidity_2m_mean'][i],
-                    precipitacion = ['precipitation_sum'][i],
+                    precipitacion = daily['precipitation_sum'][i],
                     viento = daily['wind_speed_10m_max'][i]
                  ) 
                  lista_objetos_historico.append(registro)
-                 return lista_objetos_historico
+             return lista_objetos_historico
 
         except Exception as e:
             print('Error en la fecha')
@@ -430,13 +431,13 @@ Historicos:
         Invoca el metodo para graficar.
         Utiliza pandas.
         '''
-        if df is not None or df.empty:
+        if df is None or df.empty:
             print('No se encontraron datos para procesar')
             return 
         
         df['time'] = pd.to_datetime(df['fecha'])
         df['anio'] = df['time'].dt.year
-        df['mes'] = df['time'].df.strftime('%Y-%m')
+        df['mes'] = df['time'].dt.strftime('%Y-%m')
         
         print(f'''{'-'*30} Datos mensuales historicos: {localidad_nombre}''')
         meses_unicos = df['mes'].unique()
@@ -505,6 +506,10 @@ Anio con mayor precipitacion acomulada: {lluvias_anio} ({max_lluvia:.2f} mm)
 Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
 
         df_anual = pd.DataFrame(datos_anuales)
+
+        cols = ['temperatura', 'humedad', 'precipitacion', 'viento']
+        for col in cols:
+            df_anual[col] = pd.to_numeric(df_anual[col], errors = 'coerce')
 
         self.graficar_historicos(df_anual, localidad_nombre)
 
