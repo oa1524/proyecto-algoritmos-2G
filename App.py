@@ -146,7 +146,7 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                                     print("Opcion invalida.")
                                     continue
                                 else: 
-                                    localidad_selecc = lista_municipios_filt[opcion1_1_local -1]
+                                    localidad_selecc = lista_municipios_filt[int(opcion1_1_local) -1]
                                     temperatura_localidad = self.consulta_api(municipio_selecc.nombre, localidad_selecc.local, localidad_selecc.lat, localidad_selecc.long)
                                     self.registrar_consulta(municipio_selecc, localidad_selecc, temperatura_localidad)
                                     
