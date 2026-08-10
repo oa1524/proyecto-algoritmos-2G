@@ -358,16 +358,17 @@ Historicos:
                 fecha_inicio = input('Ingrese fecha de inicio (AAAA-MM-DD): ')
                 fecha_fin = input('Ingrese fecha de fin (AAAA-MM-DD): ')
                 
-                if not self.validar_fecha(fecha_fin) or not self.validar_fecha(fecha_fin):
+                if not self.validar_fecha(fecha_inicio) or not self.validar_fecha(fecha_fin):
                     print('Introduzca una fecha valida (AAAA-MM-DD)')
                     continue
                 if fecha_inicio > fecha_fin:
                     print('La fecha de inicio debe ser anterior a la de fin')
                     continue
                 
-                df_datos = self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
-                if df_datos is not None:
-                    self.procesar_historicos(localidad_hallada.local, df_datos)        
+                lista_objetos = self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
+                if lista_objetos:
+                    df_datos = pd.DataFrame([reg.__dic__ for reg in lista_objetos])  
+                    self.procesar_historicos(localidad_hallada.local, df_datos)  
 
         else:
             print('Opcion no valida')
@@ -394,8 +395,7 @@ Historicos:
         '''
         Metodo que realiza la peticion de datos a la API.
         Recibe las coordenadas geograficas de la localidad y el rango de fechas.
-        Devuelve el data frame de pandas renombras con nombres mas cortos para su procesamiento.
-        Utiliza pandas.
+        Devuelve la lista de objetos.
         '''
         url = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={long}&start_date={fecha_inicio}&end_date={fecha_fin}&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=America%2FNew_York"
         try:
@@ -403,22 +403,21 @@ Historicos:
              datos = res.json()
 
              if 'daily' not in datos:
-                 print('No se encontraron datos para esa fecha')
-                 return None
+                 print('No se encontraron datos para esta fecha.')
 
-             df = pd.DataFrame(datos['daily'])
-             df['time'] = pd.to_datetime(df["time"])
+             daily = datos['daily']
+             lista_objetos_historico = []
 
-            #renombrar las columnas para no usar los nombres largos que da la API
-
-             df = df.rename(columns = {
-            'temperature_2m_mean':'temperatura',
-            'relative_humidity_2m_mean': 'humedad',
-            'precipitation_sum':'precipitacion',
-            'wind_speed_10m_max': 'viento'
-             })
-
-             return df 
+             for i in range(len(daily['time'])):
+                 registro = Historico(
+                     fehca = daily['time'][i],
+                     temperatura = daily['temperature_2m_mean'][i],
+                     humedad = daily['relative_humidity_2m_mean'][i],
+                    precipitacion = ['precipitation_sum'][i],
+                    viento = daily['wind_speed_10m_max'][i]
+                 ) 
+                 lista_objetos_historico.append(registro)
+                 return lista_objetos_historico
 
         except Exception as e:
             print('Error en la fecha')
@@ -431,8 +430,13 @@ Historicos:
         Invoca el metodo para graficar.
         Utiliza pandas.
         '''
-        df['anio']=df['time'].dt.year
-        df['mes']=df['time'].dt.strftime('%Y-%m')
+        if df is not None or df.empty:
+            print('No se encontraron datos para procesar')
+            return 
+        
+        df['time'] = pd.to_datetime(df['fecha'])
+        df['anio'] = df['time'].dt.year
+        df['mes'] = df['time'].df.strftime('%Y-%m')
         
         print(f'''{'-'*30} Datos mensuales historicos: {localidad_nombre}''')
         meses_unicos = df['mes'].unique()

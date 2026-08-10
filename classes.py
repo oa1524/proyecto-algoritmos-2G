@@ -41,3 +41,14 @@ class ClimaActual:
         self.humedad = humedad
         self.viento = viento
         self.codigo_clima = codigo_clima
+
+class Historico:
+    '''
+    Clase para registrar la informacion de historicos de la API.
+    '''
+    def __init__(self, fecha, temperatura, humedad, precipitacion, viento):
+        self.fecha = fecha
+        self.temperatura = temperatura
+        self.humedad = humedad
+        self.precipitacion = precipitacion
+        self.viento = viento 

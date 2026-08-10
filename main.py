@@ -1,3 +1,4 @@
+# Grupo 2G: Omaira Alcala y Maria Algarra
 from App import App
 
 def main():
