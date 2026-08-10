@@ -28,6 +28,6 @@ class RegistroConsulta:
     para poder ser usados en sus respectivos casos, especificamente en App.py menu1 y menu2.
     '''
     def __init__ (self, municipio, localidad, temperatura):
-        self.municipio = municipio # str
-        self.localidad = localidad #str
+        self.municipio = municipio #objeto Municipio
+        self.localidad = localidad #objeto Localidad
         self.temperatura = temperatura #float

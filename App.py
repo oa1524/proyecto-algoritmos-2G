@@ -25,7 +25,7 @@ class App():
     def read(self):
         with open("zonas_caracas.json", "r", encoding="utf-8") as z:
             zonas = json.load(z)
-        lista_municipios = []
+        self.lista_municipios = []
         for municipio in zonas:
             lista_localidades_obj = []
             lista_localidades = zonas[municipio]
@@ -33,8 +33,7 @@ class App():
                 localidad_obj = Localidad(localidad["localidad"], localidad["latitud"], localidad["longitud"])
                 lista_localidades_obj.append(localidad_obj)
             municipio_obj = Municipio(municipio, lista_localidades_obj)
-            lista_municipios.append(municipio_obj)
-        self.lista_municipios = lista_municipios
+            self.lista_municipios.append(municipio_obj)
 
     '''
     Metodo utilizado para generar el reporte inicial del programa (Requerimiento 1 Carga de datos)
@@ -140,7 +139,7 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                                 else: 
                                     localidad_selecc = lista_municipios_filt[opcion1_1_local -1]
                                     temperatura_localidad = self.consulta_api(municipio_selecc.nombre, localidad_selecc.local, localidad_selecc.lat, localidad_selecc.long)
-                                    self.registrar_consulta(municipio_selecc.nombre, localidad_selecc.local, temperatura_localidad)
+                                    self.registrar_consulta(municipio_selecc, localidad_selecc, temperatura_localidad)
                                     
             elif opcion1_1 == 2:
                 while True:
@@ -158,7 +157,7 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                             for localidad in municipio.local:
                                 if opcion1_2 in localidad.local.upper(): 
                                     temperatura_localidad = self.consulta_api(municipio.nombre, localidad.local, localidad.lat, localidad.long)
-                                    self.registrar_consulta(municipio.nombre, localidad.local, temperatura_localidad)
+                                    self.registrar_consulta(municipio, localidad, temperatura_localidad)
                                     encontrado = True
                                     break
                         if not encontrado:
@@ -243,8 +242,8 @@ Reportes y estadisticas:
             if registro.temperatura < mas_fria.temperatura:
                 mas_fria = registro
 
-        print (f'Mas calida: {mas_calida.municipio, mas_calida.localidad} con {mas_calida.temperatura} grados c')
-        print (f'Mas fria: {mas_fria.municipio, mas_fria.localidad} con {mas_fria.temperatura} grados c')
+        print (f'Mas calida: {mas_calida.municipio.nombre, mas_calida.localidad.local} con {mas_calida.temperatura} grados c')
+        print (f'Mas fria: {mas_fria.municipio.nombre, mas_fria.localidad.local} con {mas_fria.temperatura} grados c')
 
     '''
     Metodo que recorre la lista de municipios y sus localidades para identificar las que no poseen coordenadas.
@@ -283,8 +282,8 @@ Reportes y estadisticas:
             return
         datos = [
             {
-              'municipio': reg.municipio,
-              'localidad': reg.localidad,
+              'municipio': reg.municipio.nombre,
+              'localidad': reg.localidad.local,
               'temperatura': reg.temperatura
              }
              for reg in self.lista_registro
