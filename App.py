@@ -236,7 +236,7 @@ Reportes y estadisticas:
 2. Cobertura geografica
 3. Promedio general""")
 
-            opcion2 = input('Seleccione una opcion:')
+            opcion2 = input('Seleccione una opcion: ')
 
             if opcion2 == "0":
                 break
@@ -499,38 +499,43 @@ Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
 
         df_anual = pd.DataFrame(datos_anuales)
 
-        self.graficar_historicos(df_anual)
+        self.graficar_historicos(df_anual, localidad_nombre)
 
-    def graficar_historicos(self, df_anual):
+    def graficar_historicos(self, df_anual, localidad_nombre):
         '''
         Metodo que genera el grafico de los datos anuales de una localidad.
         Crea una figura con 4 subgraficos comparativos.
         Utiliza matplotlib.
         '''
 
-        fig, axs = plt.subplots(4,1, figsize = (9,9), sharex = True)
-        fig.suptitle('Evolucion anual', fontsize = 14)
+        fig, axs = plt.subplots(4, 1, figsize = (9, 9), sharex = True)
+        fig.suptitle(f'Evolucion anual- {localidad_nombre}', fontsize = 14)
 
         #Temperatura
         axs[0].plot(df_anual['anio'], df_anual['temperatura'], marker = '*', color = 'purple')
+        axs[0].set_title('Temperatura media anual', fontsize=10)
         axs[0].set_ylabel('Temperatura (°C)')
         axs[0].grid(True)
 
         #Humedad
         axs[1].plot(df_anual['anio'], df_anual['humedad'], marker = '*', color = 'steelblue')
+        axs[1].set_title('Humedad relativa media anual', fontsize=10)
         axs[1].set_ylabel('Humedad (%)')
         axs[1].grid(True)
 
         #Precipitacion
         axs[2].plot(df_anual['anio'], df_anual['precipitacion'], marker = '*', color = 'green')
+        axs[2].set_title('Precipitacion acomulada anual', fontsize=10)
         axs[2].set_ylabel('Precipitacion total (mm)')
         axs[2].grid(True)
 
         #Velocidad del viento
         axs[3].plot(df_anual['anio'], df_anual['viento'], marker = '*', color = 'red')
+        axs[3].set_title('Velocidad del viento media anual', fontsize=10)
         axs[3].set_ylabel('Velocidad del viento (km/h)')
         axs[3].set_xlabel('Anio')
         axs[3].grid(True)
+        plt.setp(axs[3].get_xticklabels(), rotation=45)
 
-        plt.tight_layout()
+        plt.tight_layout(rect = [0, 0, 1, 0.97])
         plt.show()
