@@ -1,10 +1,10 @@
 from App import App
 
-'''
-Funcion main donde se crea un objeto de la clase App, se le aplica el metodo start que contiene 
-todas las funcionalidades de la aplicacion/programa.
-'''
 def main():
+    '''
+    Funcion main donde se crea un objeto de la clase App, se le aplica el metodo start que contiene 
+    todas las funcionalidades de la aplicacion/programa.
+    '''
     app = App()
     app.start()
 
