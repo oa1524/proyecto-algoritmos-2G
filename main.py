@@ -1,4 +1,5 @@
 # Grupo 2G: Omaira Alcala y Maria Algarra
+# link al repositorio de GitHub: https://github.com/oa1524/proyecto-algoritmos-2G.git
 from App import App
 
 def main():
