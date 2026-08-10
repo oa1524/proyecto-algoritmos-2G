@@ -445,19 +445,19 @@ Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
             datos_anuales['precipitacion'].append(p_total)
             datos_anuales['viento'].append(v_prom)
 
-            if max_temp is not None or t_prom > max_temp:
+            if max_temp is None or t_prom > max_temp:
                 max_temp = t_prom
                 caluroso_anio = a
 
-            if min_temp is not None or t_prom < min_temp:
+            if min_temp is None or t_prom < min_temp:
                 min_temp = t_prom
                 fresco_anio = a
 
-            if p_total > max_lluvia:
+            if max_lluvia is None or p_total > max_lluvia:
                 max_lluvia = p_total
                 lluvias_anio = a
 
-            if h_prom > max_humedad:
+            if max_humedad is None or h_prom > max_humedad:
                 max_humedad = h_prom
                 humedo_anio = a
 
