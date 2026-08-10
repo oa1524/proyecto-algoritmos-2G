@@ -221,13 +221,13 @@ Humedad relativa: {dicc['current']['relative_humidity_2m']}%
 Velocidad del viento: {dicc['current']['wind_speed_10m']} km/h
 Estado del tiempo: {WEATHER_CODES[wmo]}""")
             return dicc['current']['temperature_2m']
-
-    '''
-    Metodo que genera el menu de reportes y estadisticas (opcion 2 del menu principal).
-    Permite seleccionar entre consultar ranking de temperaturas, ver la cobertura geografica sin coordenadas o 
-    calcular el promedio de las consultas realizadas.
-    '''
+        
     def menu2(self):
+        '''
+        Metodo que genera el menu de reportes y estadisticas (opcion 2 del menu principal).
+        Permite seleccionar entre consultar ranking de temperaturas, ver la cobertura geografica sin coordenadas o 
+        calcular el promedio de las consultas realizadas.
+        '''
         while True:
             print(f"""{"-"*30} 
 Reportes y estadisticas:
@@ -250,12 +250,13 @@ Reportes y estadisticas:
                 print("Opcion invalida. Escriba un numero del 0-3")
                 continue
 
-    '''
-    Metodo encargado de evaluar las consultas realizadas que estan en el historial de registro.
-    Determina e imprime la localidad que tiene la temperatura mas fria y la mas calida.
-    Si no existen registros previo lo informa.
-    '''
+    
     def ranking_temperatura (self):
+        '''
+        Metodo encargado de evaluar las consultas realizadas que estan en el historial de registro.
+        Determina e imprime la localidad que tiene la temperatura mas fria y la mas calida.
+        Si no existen registros previo lo informa.
+        '''
         print (f'{"-"*30} \n Comparacion de temperaturas consultadas ')
     
         if len(self.lista_registro) == 0:
@@ -275,11 +276,11 @@ Reportes y estadisticas:
         print (f'Mas calida: {mas_calida.municipio.nombre, mas_calida.localidad.local} con {mas_calida.temperatura} °C')
         print (f'Mas fria: {mas_fria.municipio.nombre, mas_fria.localidad.local} con {mas_fria.temperatura} °C')
 
-    '''
-    Metodo que recorre la lista de municipios y sus localidades para identificar las que no poseen coordenadas.
-    Imprime en pantalla las localidades sin coordenads ordenadas por municipio.
-    '''
     def cobertura_geografica(self):
+        '''
+        Metodo que recorre la lista de municipios y sus localidades para identificar las que no poseen coordenadas.
+        Imprime en pantalla las localidades sin coordenads ordenadas por municipio.
+        '''
         print(f"""{"-"*30} \n Localidades sin coordenadas""")
 
         for municipio in self.lista_municipios:
@@ -292,19 +293,19 @@ Reportes y estadisticas:
                 for nombre_loc in sin_coordenadas:
                     print (f"- {nombre_loc}")
 
-    '''
-    Metodo auxiliar que crea un objeto de la clase registro consulta con los datos de una busqueda y 
-    lo guarda en un lista de registro que es usada otras funciones.
-    '''
     def registrar_consulta (self, municipio, localidad, temperatura):
+        '''
+        Metodo auxiliar que crea un objeto de la clase registro consulta con los datos de una busqueda y 
+        lo guarda en un lista de registro que es usada otras funciones.
+        '''
         nuevo_registro = RegistroConsulta(municipio, localidad, temperatura)
         self.lista_registro.append(nuevo_registro)
 
-    '''
-    Metodo que procesa el historial de consultas(lista) y lo transforma en un data frame de pandas.
-    Calcula e imprime el promedio general de temperaturas obtenidas en la consulta.
-    '''
     def promedio_temperaturas(self):
+        '''
+        Metodo que procesa el historial de consultas(lista) y lo transforma en un data frame de pandas.
+        Calcula e imprime el promedio general de temperaturas obtenidas en la consulta.
+        '''
         print(f'''{'-'*30}\n Promedio de temperaturas consultadas''')
         cant_registros = len(self.lista_registro)
         if cant_registros == 0:
@@ -323,13 +324,13 @@ Reportes y estadisticas:
         print(f'Total de consultas realizadas: {len(df)}')
         print(f'Promedio de temperatura: {promedio:.2f} grados °C')
 
-    '''
-    Metodo que genera el menu de consultas historicas (opcion 3 del menu principal).
-    Permite al usuario consultar el historial de datos meteorologicos de una localidad dentro de un rango de fechas especificas.
-    Llama a la API y procesa los datos y muestra resultados y graficos.
-    '''
     def menu3(self):
-      while True:
+       '''
+        Metodo que genera el menu de consultas historicas (opcion 3 del menu principal).
+        Permite al usuario consultar el historial de datos meteorologicos de una localidad dentro de un rango de fechas especificas.
+        Llama a la API y procesa los datos y muestra resultados y graficos.
+        '''
+       while True:
         print(f"""{"-"*30}
 Historicos:
 0. Volver al menu anterior
@@ -369,11 +370,11 @@ Historicos:
             print('Opcion no valida')
             continue
 
-    '''
-    Metodo que valida que el formato de las fechas sea correcto.
-    Devuelve la fecha.
-    '''
     def validar_fecha(self,texto):
+        '''
+        Metodo que valida que el formato de las fechas sea correcto.
+        Devuelve la fecha.
+        '''
         partes = texto.split('-')
         if len(partes) !=3:
             return False
@@ -386,13 +387,13 @@ Historicos:
             return False
         return 1 <= int(mes) <= 12 and 1 <= int(dia) <= 31
     
-    '''
-    Metodo que realiza la peticion de datos a la API.
-    Recibe las coordenadas geograficas de la localidad y el rango de fechas.
-    Devuelve el data frame de pandas renombras con nombres mas cortos para su procesamiento.
-    Utiliza pandas.
-    '''
     def obtener_historicos_api(self, lat, long, fecha_inicio, fecha_fin):
+        '''
+        Metodo que realiza la peticion de datos a la API.
+        Recibe las coordenadas geograficas de la localidad y el rango de fechas.
+        Devuelve el data frame de pandas renombras con nombres mas cortos para su procesamiento.
+        Utiliza pandas.
+        '''
         url = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={long}&start_date={fecha_inicio}&end_date={fecha_fin}&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=America%2FNew_York"
         try:
              res = requests.get(url)
@@ -420,13 +421,13 @@ Historicos:
             print('Error en la fecha')
             return None
 
-    '''
-    Metodo utilizado para procesar la data historica de la API.
-    Calcula y muestra en consola las estadisticas agrupadas por mes, los promedios generales y un resumen de datos anual.
-    Invoca el metodo para graficar.
-    Utiliza pandas.
-    '''
     def procesar_historicos(self,localidad_nombre, df):
+        '''
+        Metodo utilizado para procesar la data historica de la API.
+        Calcula y muestra en consola las estadisticas agrupadas por mes, los promedios generales y un resumen de datos anual.
+        Invoca el metodo para graficar.
+        Utiliza pandas.
+        '''
         df['anio']=df['time'].dt.year
         df['mes']=df['time'].dt.strftime('%Y-%m')
         
@@ -500,12 +501,12 @@ Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
 
         self.graficar_historicos(df_anual)
 
-    ''' 
-    Metodo que genera el grafico de los datos anuales.
-    Crea una figura con cuatro subgraficos comparativos a lo largo de los anios seleccionados.
-    Utiliza matplotlib.
-    '''
     def graficar_historicos(self, df_anual):
+        '''
+        Metodo que genera el grafico de los datos anuales de una localidad.
+        Crea una figura con 4 subgraficos comparativos.
+        Utiliza matplotlib.
+        '''
 
         fig, axs = plt.subplots(4,1, figsize = (9,9), sharex = True)
         fig.suptitle('Evolucion anual', fontsize = 14)
