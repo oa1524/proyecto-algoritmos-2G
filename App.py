@@ -200,8 +200,7 @@ Se encontraron coincidencias, seleccione una opcion. (Si desea volver al menu an
     def consulta_api(self, municipio, localidad, latitud, longitud):
         '''
         Primer metodo de consulta a la API que devuelve e imprime los detalles meteorológicos de la localidad
-        consultada por el usuario y colocada con sus especificaciones en los argumentos de este metodo. Tambien,
-        devuelve el valor de temperatura para poder ser usado en el menu2. (Reportes y Estadisticas)
+        consultada por el usuario. Transforma la respuesta JSON en un objeto de clase ClimaActual.
         '''
         if latitud is None or longitud is None:
             print("No se posee datos de latitud y longitud.") 
@@ -210,17 +209,21 @@ Se encontraron coincidencias, seleccione una opcion. (Si desea volver al menu an
             url = f"https://api.open-meteo.com/v1/forecast?latitude={latitud}&longitude={longitud}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=America%2FNew_York&forecast_days=1"
             consulta = requests.get(url)
             dicc = consulta.json()
+            temp = dicc['current']['temperature_2m']
+            hum = dicc['current']['relative_humidity_2m']
+            viento = dicc['current']['wind_speed_10m']
             wmo = dicc['current']['weather_code']
+            clima_obj = ClimaActual(temp, hum, viento, wmo)
             print(f"""{"-"*30}
 Nombre de municipio: {municipio}
 Nombre de localidad: {localidad}
 Latitud: {latitud}
 Longitud: {longitud}
-Temperatura actual: {dicc['current']['temperature_2m']}°C
-Humedad relativa: {dicc['current']['relative_humidity_2m']}%
-Velocidad del viento: {dicc['current']['wind_speed_10m']} km/h
-Estado del tiempo: {WEATHER_CODES[wmo]}""")
-            return dicc['current']['temperature_2m']
+Temperatura actual: {clima_obj.temperatura}°C
+Humedad relativa: {clima_obj.humedad}%
+Velocidad del viento: {clima_obj.viento} km/h
+Estado del tiempo: {WEATHER_CODES[clima_obj.codigo_clima]}""")     
+            return clima_obj.temperatura
         
     def menu2(self):
         '''

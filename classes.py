@@ -31,3 +31,13 @@ class RegistroConsulta:
         self.municipio = municipio #objeto Municipio
         self.localidad = localidad #objeto Localidad
         self.temperatura = temperatura #float
+
+class ClimaActual:
+    '''
+    Clase clima para registrar la informacion de la API.
+    '''
+    def __init__(self, temperatura, humedad, viento, codigo_clima):
+        self.temperatura = temperatura
+        self.humedad = humedad
+        self.viento = viento
+        self.codigo_clima = codigo_clima
