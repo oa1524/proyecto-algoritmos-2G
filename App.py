@@ -5,24 +5,26 @@ from dicc_wmo import WEATHER_CODES
 import pandas as pd
 import matplotlib.pyplot as plt
 
-class App():
+class App:
     lista_municipios = []
     lista_registro = []
 
-    '''
-    Metodo principal que llama a ejecutar el resto de los metodos de la clase para el
-    funcionamiento del programa.
-    '''
+
     def start(self):
+        '''
+        Metodo principal que llama a ejecutar el resto de los metodos de la clase para el
+        funcionamiento del programa.
+        '''
         self.read()
         self.ver_coord()
         self.menu_p()
 
-    '''
-    Metodo read hecho para leer zonas_caracas.json y organizar su data creando los objetos que le
-    correspondan respectivamente. 
-    '''
+
     def read(self):
+        '''
+        Metodo read hecho para leer zonas_caracas.json y organizar su data creando los objetos que le
+        correspondan respectivamente. 
+        '''
         with open("zonas_caracas.json", "r", encoding="utf-8") as z:
             zonas = json.load(z)
         self.lista_municipios = []
@@ -35,17 +37,18 @@ class App():
             municipio_obj = Municipio(municipio, lista_localidades_obj)
             self.lista_municipios.append(municipio_obj)
 
-    '''
-    Metodo utilizado para generar el reporte inicial del programa (Requerimiento 1 Carga de datos)
-    '''
+
     def ver_coord(self):
+        '''
+        Metodo utilizado para generar el reporte inicial del programa (Requerimiento 1 Carga de datos)
+        '''
         for municipio in self.lista_municipios:
             cant_local = 0
             cant_local_coord = 0
             cant_local_nocoord = 0
             for localidad in municipio.local:
                 cant_local+=1
-                if localidad.lat is not None and localidad.long is not None:
+                if localidad.tiene_coordenadas():
                     cant_local_coord+=1
                 else:
                     cant_local_nocoord+=1
@@ -58,11 +61,11 @@ class App():
         Porcentaje de localidades con coordenadas: {round(porcentaje_local_coord, 2)}%
     """)
 
-    '''
-    Metodo que genera el menu principal del programa y evalua que opcion selecciona el usuario
-    llamando respectivamente al resto de los menus.
-    '''
     def menu_p(self):
+        '''
+        Metodo que genera el menu principal del programa y evalua que opcion selecciona el usuario
+        llamando respectivamente al resto de los menus.
+        '''
         while True:
             print(f"""{"-"*30}
 0. Cerrar programa
@@ -70,29 +73,29 @@ class App():
 2. Reportes y Estadisticas
 3. Historicos
 """)
-            opcion = int(input("Seleccione una opcion: "))
-            if opcion == 0:
+            opcion = input("Seleccione una opcion: ")
+            if opcion == "0":
                 break
-            elif opcion == 1:
+            elif opcion == "1":
                 self.menu1()
-            elif opcion == 2:
+            elif opcion == "2":
                 self.menu2()
-            elif opcion == 3:
+            elif opcion == "3":
                 self.menu3()
             else:
                 print("Opcion invalida.")
                 continue
 
-    '''
-    Metodo que genera el menu1, el cual realiza todo el Requerimiento 2: Consulta del clima en tiempo real.
-        1. Por municipio y localidad: despliegua la lista de municipios, luego sus localidades, segun
-    la seleccion del usuario consulta la API e imprime la informacion obtenida, registrando la consulta 
-    como un objeto de clase RegistroConsulta.
-        2. Mediante busqueda directa por nombre de localidad: el usuario introduce caracteres, si el programa
-    encuentra coincidencias, consulta la API e imprime la informacion obtenida, registrando la consulta 
-    como un objeto de clase RegistroConsulta.
-    '''
     def menu1(self):
+        '''
+        Metodo que genera el menu1, el cual realiza todo el Requerimiento 2: Consulta del clima en tiempo real.
+            1. Por municipio y localidad: despliegua la lista de municipios, luego sus localidades, segun
+        la seleccion del usuario consulta la API e imprime la informacion obtenida, registrando la consulta 
+        como un objeto de clase RegistroConsulta.
+            2. Mediante busqueda directa por nombre de localidad: el usuario introduce caracteres, si el programa
+        encuentra coincidencias, consulta la API e imprime la informacion obtenida, registrando la consulta 
+        como un objeto de clase RegistroConsulta.
+        '''
         while True:
             print(f"""{"-"*30}
 Consulta del clima en tiempo real:
@@ -100,24 +103,27 @@ Consulta del clima en tiempo real:
 1. Por municipio y localidad
 2. Mediante busqueda directa por nombre de localidad
 """)
-            opcion1_1 = int(input("Seleccione una opcion: "))
-            if opcion1_1 == 0:
+            opcion1_1 = input("Seleccione una opcion: ")
+            if opcion1_1 == "0":
                 break
-            elif opcion1_1 == 1:
+            elif opcion1_1 == "1":
                 while True:
                     print(f"""{"-"*30}
 0. Volver al menu anterior""")
                     for municipio in self.lista_municipios:
                         num_opcion = self.lista_municipios.index(municipio) +1
                         print(f"{num_opcion}. {municipio.nombre}")
-                    opcion1_1_n = int(input("Seleccione una opcion: "))
-                    if opcion1_1_n == 0:
+                    opcion1_1_n = input("Seleccione una opcion: ")
+                    if opcion1_1_n == "0":
                             break
-                    elif not (opcion1_1_n > 0 and opcion1_1_n <= len(self.lista_municipios)):
+                    elif not opcion1_1_n.isnumeric():
+                        print("Opcion invalida.")
+                        continue
+                    elif not (int(opcion1_1_n) > 0 and int(opcion1_1_n) <= len(self.lista_municipios)):
                             print("Opcion invalida.")
                             continue
                     else: 
-                            municipio_selecc = self.lista_municipios[opcion1_1_n -1]
+                            municipio_selecc = self.lista_municipios[int(opcion1_1_n) -1]
                             while True:
                                 print(F"""{"-"*30}
 0. Volver al menu anterior
@@ -125,15 +131,18 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                                 num_opcion2 = 0
                                 lista_municipios_filt = []
                                 for localidad in municipio_selecc.local:
-                                    if localidad.lat is not None and localidad.long is not None:
+                                    if localidad.tiene_coordenadas():
                                         num_opcion2 += 1
                                         print(f"{num_opcion2}. {localidad.local}")
                                         lista_municipios_filt.append(localidad)
-                                opcion1_1_local = int(input("Seleccione una opcion: "))
+                                opcion1_1_local = input("Seleccione una opcion: ")
 
-                                if opcion1_1_local == 0:
+                                if opcion1_1_local == "0":
                                     break
-                                elif not (opcion1_1_local > 0 and opcion1_1_local <= num_opcion2):
+                                elif not opcion1_1_local.isnumeric():
+                                    print("Opcion invalida.")
+                                    continue
+                                elif not (int(opcion1_1_local) > 0 and int(opcion1_1_local) <= num_opcion2):
                                     print("Opcion invalida.")
                                     continue
                                 else: 
@@ -141,9 +150,8 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                                     temperatura_localidad = self.consulta_api(municipio_selecc.nombre, localidad_selecc.local, localidad_selecc.lat, localidad_selecc.long)
                                     self.registrar_consulta(municipio_selecc, localidad_selecc, temperatura_localidad)
                                     
-            elif opcion1_1 == 2:
+            elif opcion1_1 == "2":
                 while True:
-                    encontrado = False
                     print("-"*30)
                     opcion1_2 = input("Escriba la localidad a buscar (Si desea volver al menu anterior ingrese '0'): ").strip().upper()
                     if opcion1_2 == "0":
@@ -151,27 +159,50 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
                     elif len(opcion1_2) < 3:
                         print("Opcion invalida. Escriba tres o mas caracteres.")       
                     else:
-                        for municipio in self.lista_municipios:
-                            if encontrado:
-                                break
-                            for localidad in municipio.local:
-                                if opcion1_2 in localidad.local.upper(): 
-                                    temperatura_localidad = self.consulta_api(municipio.nombre, localidad.local, localidad.lat, localidad.long)
-                                    self.registrar_consulta(municipio, localidad, temperatura_localidad)
-                                    encontrado = True
-                                    break
-                        if not encontrado:
-                            print("Opcion invalida. No se encontro coincidencias.")
+                            numero_opcion = 0
+                            coincidencias = []
+                            municipio_coincidencias = []
+                            for municipio in self.lista_municipios:
+                                for localidad in municipio.local:
+                                    if opcion1_2.upper() in localidad.local.upper() and localidad.tiene_coordenadas():
+                                        numero_opcion += 1
+                                        coincidencias.append(localidad)
+                                        municipio_coincidencias.append(municipio)
+                            if numero_opcion == 0:
+                                    print("Opcion invalida. No se encontro coincidencias.")
+                            else:
+                                    while True: 
+                                        print(f'''{'-'*30}
+Se encontraron coincidencias, seleccione una opcion. (Si desea volver al menu anterior ingrese '0'): ''')
+                                        for localidad in coincidencias:
+                                            numero_opcion2 = coincidencias.index(localidad) + 1
+                                            print(f'{numero_opcion2}. {localidad.local}')
+                                        opcion_coin = input("Seleccione una opcion: ")
+                                        if not opcion_coin.isnumeric():
+                                            print("Opcion invalida.")
+                                            continue
+                                        elif opcion_coin == "0":
+                                            break
+                                        elif not (int(opcion_coin) > 0 and int(opcion_coin) <= numero_opcion):
+                                            print("Opcion invalida.")
+                                            continue
+                                        else:
+                                            localidad = coincidencias[int(opcion_coin) - 1]
+                                            municipio = municipio_coincidencias[int(opcion_coin) - 1]
+                                            temperatura_localidad = self.consulta_api(municipio.nombre, localidad.local, localidad.lat, localidad.long)
+                                            self.registrar_consulta(municipio, localidad, temperatura_localidad)
+                                            continue
             else:
                 print("Opcion invalida.")
                 continue
 
-    '''
-    Primer metodo de consulta a la API que devuelve e imprime los detalles meteorológicos de la localidad
-    consultada por el usuario y colocada con sus especificaciones en los argumentos de este metodo. Tambien,
-    devuelve el valor de temperatura para poder ser usado en el menu2. (Reportes y Estadisticas)
-    '''
+
     def consulta_api(self, municipio, localidad, latitud, longitud):
+        '''
+        Primer metodo de consulta a la API que devuelve e imprime los detalles meteorológicos de la localidad
+        consultada por el usuario y colocada con sus especificaciones en los argumentos de este metodo. Tambien,
+        devuelve el valor de temperatura para poder ser usado en el menu2. (Reportes y Estadisticas)
+        '''
         if latitud is None or longitud is None:
             print("No se posee datos de latitud y longitud.") 
             return None
@@ -188,8 +219,7 @@ Longitud: {longitud}
 Temperatura actual: {dicc['current']['temperature_2m']}°C
 Humedad relativa: {dicc['current']['relative_humidity_2m']}%
 Velocidad del viento: {dicc['current']['wind_speed_10m']} km/h
-Estado del tiempo: {WEATHER_CODES[wmo]}
-    """)
+Estado del tiempo: {WEATHER_CODES[wmo]}""")
             return dicc['current']['temperature_2m']
 
     '''
@@ -218,7 +248,7 @@ Reportes y estadisticas:
                 self.promedio_temperaturas()
             else:
                 print("Opcion invalida. Escriba un numero del 0-3")
-                self.menu2()
+                continue
 
     '''
     Metodo encargado de evaluar las consultas realizadas que estan en el historial de registro.
@@ -242,8 +272,8 @@ Reportes y estadisticas:
             if registro.temperatura < mas_fria.temperatura:
                 mas_fria = registro
 
-        print (f'Mas calida: {mas_calida.municipio.nombre, mas_calida.localidad.local} con {mas_calida.temperatura} grados c')
-        print (f'Mas fria: {mas_fria.municipio.nombre, mas_fria.localidad.local} con {mas_fria.temperatura} grados c')
+        print (f'Mas calida: {mas_calida.municipio.nombre, mas_calida.localidad.local} con {mas_calida.temperatura} °C')
+        print (f'Mas fria: {mas_fria.municipio.nombre, mas_fria.localidad.local} con {mas_fria.temperatura} °C')
 
     '''
     Metodo que recorre la lista de municipios y sus localidades para identificar las que no poseen coordenadas.
@@ -291,7 +321,7 @@ Reportes y estadisticas:
         df = pd.DataFrame(datos)
         promedio = df['temperatura'].mean()
         print(f'Total de consultas realizadas: {len(df)}')
-        print(f'Promedio de temperatura: {promedio:.2f} grados c')
+        print(f'Promedio de temperatura: {promedio:.2f} grados °C')
 
     '''
     Metodo que genera el menu de consultas historicas (opcion 3 del menu principal).
@@ -306,7 +336,7 @@ Historicos:
 1. Consulta por periodo de tiempo """)
         opcion3 = input('Seleccione una opcion: ')
         if opcion3 =='0':
-            self.menu_p ()
+            self.menu_p()
         elif opcion3 =='1':
             opcion4 = input('Escriba el nombre de la localidad: ').lower().strip()
             localidad_hallada = None
@@ -325,7 +355,7 @@ Historicos:
                 fecha_fin = input('Ingrese fecha de fin (AAAA-MM-DD): ')
                 
                 if not self.validar_fecha(fecha_fin) or not self.validar_fecha(fecha_fin):
-                    print('Introduzca una fevha valida (AAAA-MM-DD)')
+                    print('Introduzca una fecha valida (AAAA-MM-DD)')
                     continue
                 if fecha_inicio > fecha_fin:
                     print('La fecha de inicio debe ser anterior a la de fin')
@@ -337,12 +367,12 @@ Historicos:
 
         else:
             print('Opcion no valida')
-            self.menu3
+            continue
+
     '''
     Metodo que valida que el formato de las fechas sea correcto.
     Devuelve la fecha.
     '''
-
     def validar_fecha(self,texto):
         partes = texto.split('-')
         if len(partes) !=3:
@@ -406,13 +436,13 @@ Historicos:
         for m in meses_unicos:
             df_mes = df[df['mes'] == m]
             print(f'''{'-'*30}Mes: {m}
-Temperatura promedio: {df_mes['temperatura'].mean():.2f} grados c
+Temperatura promedio: {df_mes['temperatura'].mean():.2f} grados °C
 Humedad relativa promedio: {df_mes['humedad'].mean():.2f}%
 Precipitacion acomulada: {df_mes['precipitacion'].sum():.2f} mm
 Velocidad del viento promedio: {df_mes['viento'].mean():.2f} km/h ''')
 
         print(f'''Promedios generales del periodo
-Temperatura media: {df['temperatura'].mean():.2f} grados c
+Temperatura media: {df['temperatura'].mean():.2f} grados °C
 Humedad relativa media: {df['humedad'].mean():.2f}%
 Precipitacion media diaria: {df['precipitacion'].mean():.2f} mm
 Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
@@ -461,8 +491,8 @@ Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
                 humedo_anio = a
 
         print(f'''{'-'*30} Resumen de anios:
-Anio mas caluroso: {caluroso_anio} ({max_temp:.2f} grados c) 
-Anio mas fresco: {fresco_anio} ({min_temp:.2f} grados c)  
+Anio mas caluroso: {caluroso_anio} ({max_temp:.2f} °C) 
+Anio mas fresco: {fresco_anio} ({min_temp:.2f} °C)  
 Anio con mayor precipitacion acomulada: {lluvias_anio} ({max_lluvia:.2f} mm)
 Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
 
@@ -482,23 +512,23 @@ Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
 
         #Temperatura
         axs[0].plot(df_anual['anio'], df_anual['temperatura'], marker = '*', color = 'purple')
-        axs[0].set_ylabel('temp (grados c)')
+        axs[0].set_ylabel('Temperatura (°C)')
         axs[0].grid(True)
 
         #Humedad
         axs[1].plot(df_anual['anio'], df_anual['humedad'], marker = '*', color = 'steelblue')
-        axs[1].set_ylabel('humedad (%)')
+        axs[1].set_ylabel('Humedad (%)')
         axs[1].grid(True)
 
         #Precipitacion
         axs[2].plot(df_anual['anio'], df_anual['precipitacion'], marker = '*', color = 'green')
-        axs[2].set_ylabel('precip. total (mm)')
+        axs[2].set_ylabel('Precipitacion total (mm)')
         axs[2].grid(True)
 
         #Velocidad del viento
         axs[3].plot(df_anual['anio'], df_anual['viento'], marker = '*', color = 'red')
-        axs[3].set_ylabel('viento (km/h)')
-        axs[3].set_xlabel('anio')
+        axs[3].set_ylabel('Velocidad del viento (km/h)')
+        axs[3].set_xlabel('Anio')
         axs[3].grid(True)
 
         plt.tight_layout()
