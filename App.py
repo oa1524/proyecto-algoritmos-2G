@@ -4,7 +4,6 @@ import requests
 from dicc_wmo import WEATHER_CODES
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime 
 
 class App():
     lista_municipios = []
@@ -175,7 +174,8 @@ Municipio seleccionado: {municipio_selecc.nombre}""")
     '''
     def consulta_api(self, municipio, localidad, latitud, longitud):
         if latitud is None or longitud is None:
-            print("No se posee datos de latitud y longitud.")
+            print("No se posee datos de latitud y longitud.") 
+            return None
         else:
             url = f"https://api.open-meteo.com/v1/forecast?latitude={latitud}&longitude={longitud}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=America%2FNew_York&forecast_days=1"
             consulta = requests.get(url)
@@ -207,13 +207,13 @@ Reportes y estadisticas:
 2. Cobertura geografica
 3. Promedio general""")
 
-            opcion2= input('Seleccione una opcion:')
+            opcion2 = input('Seleccione una opcion:')
 
             if opcion2 == "0":
                 break
-            elif opcion2== "1":
+            elif opcion2 == "1":
                 self.ranking_temperatura ()
-            elif opcion2== "2":
+            elif opcion2 == "2":
                 self.cobertura_geografica()
             elif opcion2 == "3":
                 self.promedio_temperaturas()
@@ -229,7 +229,7 @@ Reportes y estadisticas:
     def ranking_temperatura (self):
         print (f'{"-"*30} \n Comparacion de temperaturas consultadas ')
     
-        if len(self.lista_registro)==0:
+        if len(self.lista_registro) == 0:
             print ('No se puede realizar la comparacion ya que no se ha buscado nada')
             return
 
@@ -254,11 +254,11 @@ Reportes y estadisticas:
         print(f"""{"-"*30} \n Localidades sin coordenadas""")
 
         for municipio in self.lista_municipios:
-            sin_coordenadas=[]
+            sin_coordenadas = []
             for localidad in municipio.local:
                 if localidad.lat is None or localidad.long is None:
                     sin_coordenadas.append(localidad.local)
-            if len(sin_coordenadas) >0:
+            if len(sin_coordenadas) > 0:
                 print (f"{'-'*30}\nMunicipio:{municipio.nombre}")
                 for nombre_loc in sin_coordenadas:
                     print (f"- {nombre_loc}")
@@ -277,11 +277,11 @@ Reportes y estadisticas:
     '''
     def promedio_temperaturas(self):
         print(f'''{'-'*30}\n Promedio de temperaturas consultadas''')
-        cant_registros=len(self.lista_registro)
-        if cant_registros==0:
+        cant_registros = len(self.lista_registro)
+        if cant_registros == 0:
             print('No se puede realizar el promedio ya que no hay consultas')
             return
-        datos= [
+        datos = [
             {
               'municipio': reg.municipio,
               'localidad': reg.localidad,
@@ -289,8 +289,8 @@ Reportes y estadisticas:
              }
              for reg in self.lista_registro
           ]
-        df=pd.DataFrame(datos)
-        promedio= df['temperatura'].mean()
+        df = pd.DataFrame(datos)
+        promedio = df['temperatura'].mean()
         print(f'Total de consultas realizadas: {len(df)}')
         print(f'Promedio de temperatura: {promedio:.2f} grados c')
 
@@ -300,20 +300,21 @@ Reportes y estadisticas:
     Llama a la API y procesa los datos y muestra resultados y graficos.
     '''
     def menu3(self):
+      while True:
         print(f"""{"-"*30}
 Historicos:
 0. Volver al menu anterior
 1. Consulta por periodo de tiempo """)
-        opcion3=input('Seleccione una opcion: ')
+        opcion3 = input('Seleccione una opcion: ')
         if opcion3 =='0':
-            self.menu_p
-        elif opcion3=='1':
-            opcion4=input('Escriba el nombre de la localidad: ').lower().strip()
-            localidad_hallada=None
+            self.menu_p ()
+        elif opcion3 =='1':
+            opcion4 = input('Escriba el nombre de la localidad: ').lower().strip()
+            localidad_hallada = None
             for municipio in  self.lista_municipios:
                 for loc in municipio.local:
-                    if opcion4 in loc.local.lower():
-                        localidad_hallada=loc
+                    if opcion4 in loc.local.lower() and loc.tiene_coordenadas():
+                        localidad_hallada = loc
                         break
                 if localidad_hallada:
                     break
@@ -321,21 +322,17 @@ Historicos:
                 print ('Localidad no encontrada')
             else:
                 print(f'Localidad hallada: {localidad_hallada.local}')
-                while True:
-                    fecha_inicio=input('Ingrese fecha de inicio (AAAA-MM-DD): ')
-                    try:
-                        datetime.strptime(fecha_inicio, '%Y-%m-%d')
-                        break
-                    except ValueError:
-                        print('Error: ingrese una fecha valida en el formato (AAAA-MM-DD)')
-                while True:
-                    fecha_fin=input('Ingrese fecha de fin (AAAA-MM-DD): ')
-                    try:
-                        datetime.strptime(fecha_fin, '%Y-%m-%d')
-                        break
-                    except ValueError:
-                        print('Error: ingrese una fecha valida en el formato (AAAA-MM-DD)')
-                df_datos= self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
+                fecha_inicio = input('Ingrese fecha de inicio (AAAA-MM-DD): ')
+                fecha_fin = input('Ingrese fecha de fin (AAAA-MM-DD): ')
+                
+                if not self.validar_fecha(fecha_fin) or not self.validar_fecha(fecha_fin):
+                    print('Introduzca una fevha valida (AAAA-MM-DD)')
+                    continue
+                if fecha_inicio > fecha_fin:
+                    print('La fecha de inicio debe ser anterior a la de fin')
+                    continue
+                
+                df_datos = self.obtener_historicos_api(localidad_hallada.lat, localidad_hallada.long, fecha_inicio, fecha_fin)
                 if df_datos is not None:
                     self.procesar_historicos(localidad_hallada.local, df_datos)        
 
@@ -343,29 +340,56 @@ Historicos:
             print('Opcion no valida')
             self.menu3
     '''
+    Metodo que valida que el formato de las fechas sea correcto.
+    Devuelve la fecha.
+    '''
+
+    def validar_fecha(self,texto):
+        partes = texto.split('-')
+        if len(partes) !=3:
+            return False
+        anio = partes[0]
+        mes = partes[1]
+        dia = partes[2]
+        if not (anio.isnumeric() and mes.isnumeric() and dia.isnumeric()):
+            return False
+        if len(anio) != 4:
+            return False
+        return 1 <= int(mes) <= 12 and 1 <= int(dia) <= 31
+    
+    '''
     Metodo que realiza la peticion de datos a la API.
     Recibe las coordenadas geograficas de la localidad y el rango de fechas.
     Devuelve el data frame de pandas renombras con nombres mas cortos para su procesamiento.
     Utiliza pandas.
     '''
     def obtener_historicos_api(self, lat, long, fecha_inicio, fecha_fin):
-        url=f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={long}&start_date={fecha_inicio}&end_date={fecha_fin}&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=America%2FNew_York"
-        res= requests.get(url)
-        datos= res.json()
+        url = f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={long}&start_date={fecha_inicio}&end_date={fecha_fin}&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=America%2FNew_York"
+        try:
+             res = requests.get(url)
+             datos = res.json()
 
-        df= pd.DataFrame(datos['daily'])
-        df['time']= pd.to_datetime(df["time"])
+             if 'daily' not in datos:
+                 print('No se encontraron datos para esa fecha')
+                 return None
 
-        #renombrar las columnas para no usar los nombres largos que da la API
+             df = pd.DataFrame(datos['daily'])
+             df['time'] = pd.to_datetime(df["time"])
 
-        df= df.rename(columns={
+            #renombrar las columnas para no usar los nombres largos que da la API
+
+             df = df.rename(columns = {
             'temperature_2m_mean':'temperatura',
             'relative_humidity_2m_mean': 'humedad',
             'precipitation_sum':'precipitacion',
             'wind_speed_10m_max': 'viento'
-        })
+             })
 
-        return df 
+             return df 
+
+        except Exception as e:
+            print('Error en la fecha')
+            return None
 
     '''
     Metodo utilizado para procesar la data historica de la API.
@@ -378,31 +402,30 @@ Historicos:
         df['mes']=df['time'].dt.strftime('%Y-%m')
         
         print(f'''{'-'*30} Datos mensuales historicos: {localidad_nombre}''')
-        meses_unicos=df['mes'].unique()
+        meses_unicos = df['mes'].unique()
 
         for m in meses_unicos:
-            df_mes=df[df['mes']==m]
-
+            df_mes = df[df['mes'] == m]
             print(f'''{'-'*30}Mes: {m}
 Temperatura promedio: {df_mes['temperatura'].mean():.2f} grados c
 Humedad relativa promedio: {df_mes['humedad'].mean():.2f}%
-Precipitacion acomulada promedio: {df_mes['precipitacion'].sum():.2f} mm
+Precipitacion acomulada: {df_mes['precipitacion'].sum():.2f} mm
 Velocidad del viento promedio: {df_mes['viento'].mean():.2f} km/h ''')
 
-            print(f'''Promedios generales del periodo
+        print(f'''Promedios generales del periodo
 Temperatura media: {df['temperatura'].mean():.2f} grados c
 Humedad relativa media: {df['humedad'].mean():.2f}%
 Precipitacion media diaria: {df['precipitacion'].mean():.2f} mm
 Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
 
-        anios_unicos=df['anio'].unique()
+        anios_unicos = df['anio'].unique()
 
-        max_temp, caluroso_anio=-999, None
-        min_temp, fresco_anio=900, None
-        max_lluvia, lluvias_anio=-1, None
-        max_humedad, humedo_anio=-1, None
+        max_temp, caluroso_anio = None, None
+        min_temp, fresco_anio = None, None
+        max_lluvia, lluvias_anio = None, None
+        max_humedad, humedo_anio = None, None
 
-        datos_anuales={
+        datos_anuales = {
             'anio':[],
             'temperatura':[],
             'humedad':[],
@@ -410,33 +433,33 @@ Velocidad del viento media: {df['viento'].mean():.2f} km/h ''')
             'viento':[]
         }
         for a in anios_unicos:
-            df_a=df[df['anio']==a]
-            t_prom=df_a['temperatura'].mean()
-            h_prom=df_a['humedad'].mean()
-            p_prom=df_a['precipitacion'].mean()
-            v_prom=df_a['viento'].mean()
+            df_a = df[df['anio'] == a]
+            t_prom = df_a['temperatura'].mean()
+            h_prom = df_a['humedad'].mean()
+            p_total = df_a['precipitacion'].sum()
+            v_prom = df_a['viento'].mean()
 
             datos_anuales['anio'].append(str(a))
             datos_anuales['temperatura'].append(t_prom)
             datos_anuales['humedad'].append(h_prom)
-            datos_anuales['precipitacion'].append(p_prom)
+            datos_anuales['precipitacion'].append(p_total)
             datos_anuales['viento'].append(v_prom)
 
-            if t_prom>max_temp:
-                max_temp=t_prom
-                caluroso_anio=a
+            if max_temp is not None or t_prom > max_temp:
+                max_temp = t_prom
+                caluroso_anio = a
 
-            if t_prom<min_temp:
-                min_temp=t_prom
-                fresco_anio=a
+            if min_temp is not None or t_prom < min_temp:
+                min_temp = t_prom
+                fresco_anio = a
 
-            if p_prom>max_lluvia:
-                max_lluvia=p_prom
-                lluvias_anio=a
+            if p_total > max_lluvia:
+                max_lluvia = p_total
+                lluvias_anio = a
 
-            if h_prom>max_humedad:
-                max_humedad=h_prom
-                humedo_anio=a
+            if h_prom > max_humedad:
+                max_humedad = h_prom
+                humedo_anio = a
 
         print(f'''{'-'*30} Resumen de anios:
 Anio mas caluroso: {caluroso_anio} ({max_temp:.2f} grados c) 
@@ -444,7 +467,7 @@ Anio mas fresco: {fresco_anio} ({min_temp:.2f} grados c)
 Anio con mayor precipitacion acomulada: {lluvias_anio} ({max_lluvia:.2f} mm)
 Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
 
-        df_anual=pd.DataFrame(datos_anuales)
+        df_anual = pd.DataFrame(datos_anuales)
 
         self.graficar_historicos(df_anual)
 
@@ -455,26 +478,26 @@ Anio mas humedo: {humedo_anio} ({max_humedad:.2f} %) ''' )
     '''
     def graficar_historicos(self, df_anual):
 
-        fig, axs= plt.subplots(4,1, figsize=(9,9), sharex=True)
-        fig.suptitle('Evolucion anual', fontsize=14)
+        fig, axs = plt.subplots(4,1, figsize = (9,9), sharex = True)
+        fig.suptitle('Evolucion anual', fontsize = 14)
 
         #Temperatura
-        axs[0].plot(df_anual['anio'], df_anual['temperatura'], marker='*', color='purple')
+        axs[0].plot(df_anual['anio'], df_anual['temperatura'], marker = '*', color = 'purple')
         axs[0].set_ylabel('temp (grados c)')
         axs[0].grid(True)
 
         #Humedad
-        axs[1].plot(df_anual['anio'], df_anual['humedad'], marker='*', color='steelblue')
+        axs[1].plot(df_anual['anio'], df_anual['humedad'], marker = '*', color = 'steelblue')
         axs[1].set_ylabel('humedad (%)')
         axs[1].grid(True)
 
         #Precipitacion
-        axs[2].plot(df_anual['anio'], df_anual['precipitacion'], marker='*', color='green')
+        axs[2].plot(df_anual['anio'], df_anual['precipitacion'], marker = '*', color = 'green')
         axs[2].set_ylabel('precip. total (mm)')
         axs[2].grid(True)
 
         #Velocidad del viento
-        axs[3].plot(df_anual['anio'], df_anual['viento'], marker='*', color='red')
+        axs[3].plot(df_anual['anio'], df_anual['viento'], marker = '*', color = 'red')
         axs[3].set_ylabel('viento (km/h)')
         axs[3].set_xlabel('anio')
         axs[3].grid(True)

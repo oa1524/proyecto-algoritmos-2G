@@ -15,6 +15,13 @@ class Localidad:
         self.lat = lat # -> float
         self.long = long # -> float
 
+    '''
+    Funcion que indica si la localidad tiene coordenas registradas.
+    '''
+    def tiene_coordenadas(self):
+        return self.lat is not None and self.long is not None
+
+
 class RegistroConsulta:
     '''
     Clase de registro y sus atributos. Utilizada en app.py para guardar los registros del usuario
