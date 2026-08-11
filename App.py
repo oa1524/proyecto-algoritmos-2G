@@ -6,6 +6,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class App:
+    '''
+    Clase App que maneja todo el funcionamiento del programa.
+    '''
     lista_municipios = []
     lista_registro = []
 
